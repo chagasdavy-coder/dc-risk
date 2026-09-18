@@ -9,13 +9,14 @@ import PerformanceChart from "@/components/PerformanceChart";
 import DailyResultPanel from "@/components/DailyResultPanel";
 import StatisticsCards from "@/components/StatisticsCards";
 import HistoryTable from "@/components/HistoryTable";
-import { LineChart, Settings2 } from "lucide-react";
+import Dashboard from "@/components/Dashboard";
+import { Activity, Settings2 } from "lucide-react";
 
-type Tab = "operar" | "estatisticas" | "historico";
+type Tab = "inicio" | "operar" | "estatisticas" | "historico";
 
 export default function Home() {
   const rm = useRiskManagement();
-  const [tab, setTab] = useState<Tab>("operar");
+  const [tab, setTab] = useState<Tab>("inicio");
   const [showSettings, setShowSettings] = useState(false);
 
   const playedCount = rm.operations.filter((op) => op.result !== null).length;
@@ -25,7 +26,9 @@ export default function Home() {
       <header className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 text-accent">
-            <LineChart size={20} />
+            <span className="grid place-items-center w-8 h-8 rounded-lg bg-accent/10 border border-accent/30 shadow-glow">
+              <Activity size={18} />
+            </span>
             <h1 className="text-lg font-bold tracking-tight text-base-100">Gestão de Risco</h1>
           </div>
           <p className="text-xs text-base-500 mt-0.5">Opções binárias · payout {(rm.payout * 100).toFixed(0)}%</p>
@@ -53,9 +56,10 @@ export default function Home() {
         </div>
       )}
 
-      <nav className="grid grid-cols-3 gap-1.5 bg-base-900 border border-base-700 rounded-lg p-1">
+      <nav className="grid grid-cols-4 gap-1.5 bg-base-900 border border-base-700 rounded-lg p-1">
         {(
           [
+            ["inicio", "Início"],
             ["operar", "Operar"],
             ["estatisticas", "Estatísticas"],
             ["historico", "Histórico"],
@@ -65,13 +69,23 @@ export default function Home() {
             key={key}
             onClick={() => setTab(key)}
             className={`text-xs font-medium py-2 rounded-md transition-colors ${
-              tab === key ? "bg-base-700 text-base-100" : "text-base-400"
+              tab === key
+                ? "bg-accent/15 text-accent border border-accent/30"
+                : "text-base-400 border border-transparent"
             }`}
           >
             {label}
           </button>
         ))}
       </nav>
+
+      {tab === "inicio" && (
+        <Dashboard
+          bankHistory={rm.bankHistory}
+          calendarData={rm.calendarData}
+          savedBank={rm.savedBank}
+        />
+      )}
 
       {tab === "operar" && (
         <div className="space-y-5">
@@ -90,6 +104,8 @@ export default function Home() {
           <OperationTable
             operations={rm.operations}
             onResult={rm.registerResult}
+            onPayoutChange={rm.setOperationPayout}
+            onPairChange={rm.setOperationPair}
             locked={rm.dayStatus.locked}
           />
 

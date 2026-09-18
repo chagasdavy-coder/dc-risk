@@ -9,6 +9,8 @@ export interface Operation {
   result: OperationResult;
   active: boolean; // whether this operation is currently playable
   profit: number; // realized profit/loss contributed by this operation
+  payout: number; // per-operation payout of the traded pair (0-1)
+  pair: string; // traded pair / paridade (e.g. "EUR/USD")
 }
 
 export interface DayStatus {
@@ -23,7 +25,7 @@ export interface HistoryEntry {
   initialBank: number;
   risk: RiskLevel;
   payout: number;
-  entries: { label: string; value: number; result: OperationResult }[];
+  entries: { label: string; value: number; result: OperationResult; payout?: number; pair?: string }[];
   profit: number;
   loss: number;
   netResult: number;
