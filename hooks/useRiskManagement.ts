@@ -153,7 +153,9 @@ export function useRiskManagement() {
 
   const chartData = useMemo(() => {
     let running = savedBank;
-    const points = [{ name: "Banca inicial", banca: round2(running) }];
+    const points: { name: string; banca: number; played?: boolean }[] = [
+      { name: "Banca inicial", banca: round2(running) },
+    ];
     for (const op of operations) {
       if (op.result !== null) {
         running += op.profit;
