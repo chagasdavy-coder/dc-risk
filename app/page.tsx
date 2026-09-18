@@ -10,7 +10,7 @@ import DailyResultPanel from "@/components/DailyResultPanel";
 import StatisticsCards from "@/components/StatisticsCards";
 import HistoryTable from "@/components/HistoryTable";
 import Dashboard from "@/components/Dashboard";
-import { Activity, Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react";
 
 type Tab = "inicio" | "operar" | "estatisticas" | "historico";
 
@@ -25,13 +25,19 @@ export default function Home() {
     <main className="max-w-md mx-auto px-4 pt-6 pb-10 space-y-5">
       <header className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2 text-accent">
-            <span className="grid place-items-center w-8 h-8 rounded-lg bg-accent/10 border border-accent/30 shadow-glow">
-              <Activity size={18} />
-            </span>
-            <h1 className="text-lg font-bold tracking-tight text-base-100">Gestão de Risco</h1>
-          </div>
-          <p className="text-xs text-base-500 mt-0.5">Opções binárias · payout {(rm.payout * 100).toFixed(0)}%</p>
+          <div
+            role="img"
+            aria-label="DC Trader · Operações & Gestão"
+            style={{
+              width: 230,
+              height: 36,
+              backgroundImage: "url(/dc-trader-logo.png)",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "461px auto",
+              backgroundPosition: "-116px -126px",
+            }}
+          />
+          <p className="text-xs text-base-500 mt-1">Gestão de risco · payout {(rm.payout * 100).toFixed(0)}%</p>
         </div>
         <button
           onClick={() => setShowSettings((s) => !s)}
