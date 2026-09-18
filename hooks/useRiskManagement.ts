@@ -16,12 +16,12 @@ function round2(n: number) {
   return Math.round(n * 100) / 100;
 }
 
-function emptyOperations(): Operation[] {
+function emptyOperations(payout = 0.9): Operation[] {
   return [
-    { id: 1, label: "Entrada 1", value: 0, result: null, active: true, profit: 0 },
-    { id: 2, label: "Entrada 2", value: 0, result: null, active: true, profit: 0 },
-    { id: 3, label: "Entrada 3", value: 0, result: null, active: false, profit: 0 },
-    { id: 4, label: "Entrada 4", value: 0, result: null, active: false, profit: 0 },
+    { id: 1, label: "Entrada 1", value: 0, result: null, active: true, profit: 0, payout, pair: "" },
+    { id: 2, label: "Entrada 2", value: 0, result: null, active: true, profit: 0, payout, pair: "" },
+    { id: 3, label: "Entrada 3", value: 0, result: null, active: false, profit: 0, payout, pair: "" },
+    { id: 4, label: "Entrada 4", value: 0, result: null, active: false, profit: 0, payout, pair: "" },
   ];
 }
 
@@ -64,6 +64,16 @@ export function useRiskManagement() {
       );
     });
   }, [baseEntryValue]);
+
+  // Keep untouched operations aligned with the global default payout
+  useEffect(() => {
+    setOperations((prev) => {
+      const untouched = prev.every((op) => op.result === null);
+      if (!untouched) return prev;
+      if (prev.every((op) => op.payout === payout)) return prev;
+      return prev.map((op) => ({ ...op, payout }));
+    });
+  }, [payout]);
 
   const setBank = useCallback((value: number) => {
     setBankRaw(Math.max(0, value));
@@ -115,7 +125,7 @@ export function useRiskManagement() {
         if (id === 1 || id === 2) {
           const nextEntry = next.find((o) => o.id === (id === 1 ? 3 : 4))!;
           if (result === "win") {
-            const lucro = round2(current.value * payout);
+            const lucro = round2(current.value * current.payout);
             current.profit = lucro;
             nextEntry.value = round2(current.value + lucro);
             nextEntry.active = true;
@@ -127,7 +137,7 @@ export function useRiskManagement() {
         } else {
           // entrada 3 or 4: only exists because its parent won
           if (result === "win") {
-            const lucro = round2(current.value * payout);
+            const lucro = round2(current.value * current.payout);
             current.profit = lucro;
           } else {
             current.profit = -current.value;
@@ -137,8 +147,17 @@ export function useRiskManagement() {
         return next;
       });
     },
-    [dayStatus.locked, payout]
+    [dayStatus.locked]
   );
+
+  const setOperationPayout = useCallback((id: 1 | 2 | 3 | 4, p: number) => {
+    const safe = Math.min(1, Math.max(0.01, p));
+    setOperations((prev) => prev.map((op) => (op.id === id ? { ...op, payout: safe } : op)));
+  }, []);
+
+  const setOperationPair = useCallback((id: 1 | 2 | 3 | 4, pair: string) => {
+    setOperations((prev) => prev.map((op) => (op.id === id ? { ...op, pair } : op)));
+  }, []);
 
   // Evaluate take/stop after every change to results
   useEffect(() => {
@@ -169,14 +188,38 @@ export function useRiskManagement() {
     return points;
   }, [operations, savedBank]);
 
+  // Evolution of the bank across saved days (for the dashboard chart)
+  const bankHistory = useMemo(() => {
+    const sorted = [...history].sort((a, b) => a.timestamp - b.timestamp);
+    const points: { name: string; banca: number }[] = [];
+    if (sorted.length > 0) {
+      points.push({ name: "Início", banca: round2(sorted[0].initialBank) });
+    }
+    for (const h of sorted) {
+      const d = new Date(h.date + "T00:00:00");
+      const name = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+      points.push({ name, banca: round2(h.initialBank + h.netResult) });
+    }
+    return points;
+  }, [history]);
+
+  // Net result aggregated by ISO date (for the calendar)
+  const calendarData = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const h of history) {
+      map[h.date] = round2((map[h.date] ?? 0) + h.netResult);
+    }
+    return map;
+  }, [history]);
+
   const resetOperations = useCallback(() => {
     setOperations(
-      emptyOperations().map((op) =>
+      emptyOperations(payout).map((op) =>
         op.id === 1 || op.id === 2 ? { ...op, value: baseEntryValue } : op
       )
     );
     setDayStatus({ locked: false, reason: null });
-  }, [baseEntryValue]);
+  }, [baseEntryValue, payout]);
 
   const finishDay = useCallback(() => {
     const played = operations.filter((op) => op.result !== null);
@@ -189,7 +232,13 @@ export function useRiskManagement() {
       initialBank: savedBank,
       risk,
       payout,
-      entries: played.map((op) => ({ label: op.label, value: op.value, result: op.result })),
+      entries: played.map((op) => ({
+        label: op.label,
+        value: op.value,
+        result: op.result,
+        payout: op.payout,
+        pair: op.pair,
+      })),
       profit: dailyResult.profit,
       loss: dailyResult.loss,
       netResult: dailyResult.net,
@@ -274,11 +323,15 @@ export function useRiskManagement() {
     stop,
     operations,
     registerResult,
+    setOperationPayout,
+    setOperationPair,
     dailyResult,
     dayStatus,
     resetOperations,
     finishDay,
     chartData,
+    bankHistory,
+    calendarData,
     history,
     statistics,
   };

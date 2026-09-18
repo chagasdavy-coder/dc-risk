@@ -9,13 +9,14 @@ import PerformanceChart from "@/components/PerformanceChart";
 import DailyResultPanel from "@/components/DailyResultPanel";
 import StatisticsCards from "@/components/StatisticsCards";
 import HistoryTable from "@/components/HistoryTable";
-import { LineChart, Settings2 } from "lucide-react";
+import Dashboard from "@/components/Dashboard";
+import { Settings2 } from "lucide-react";
 
-type Tab = "operar" | "estatisticas" | "historico";
+type Tab = "inicio" | "operar" | "estatisticas" | "historico";
 
 export default function Home() {
   const rm = useRiskManagement();
-  const [tab, setTab] = useState<Tab>("operar");
+  const [tab, setTab] = useState<Tab>("inicio");
   const [showSettings, setShowSettings] = useState(false);
 
   const playedCount = rm.operations.filter((op) => op.result !== null).length;
@@ -24,11 +25,19 @@ export default function Home() {
     <main className="max-w-md mx-auto px-4 pt-6 pb-10 space-y-5">
       <header className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2 text-accent">
-            <LineChart size={20} />
-            <h1 className="text-lg font-bold tracking-tight text-base-100">Gestão de Risco</h1>
-          </div>
-          <p className="text-xs text-base-500 mt-0.5">Opções binárias · payout {(rm.payout * 100).toFixed(0)}%</p>
+          <div
+            role="img"
+            aria-label="DC Trader · Operações & Gestão"
+            style={{
+              width: 230,
+              height: 36,
+              backgroundImage: "url(/dc-trader-logo.png)",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "461px auto",
+              backgroundPosition: "-116px -126px",
+            }}
+          />
+          <p className="text-xs text-base-500 mt-1">Gestão de risco · payout {(rm.payout * 100).toFixed(0)}%</p>
         </div>
         <button
           onClick={() => setShowSettings((s) => !s)}
@@ -53,9 +62,10 @@ export default function Home() {
         </div>
       )}
 
-      <nav className="grid grid-cols-3 gap-1.5 bg-base-900 border border-base-700 rounded-lg p-1">
+      <nav className="grid grid-cols-4 gap-1.5 bg-base-900 border border-base-700 rounded-lg p-1">
         {(
           [
+            ["inicio", "Início"],
             ["operar", "Operar"],
             ["estatisticas", "Estatísticas"],
             ["historico", "Histórico"],
@@ -65,13 +75,23 @@ export default function Home() {
             key={key}
             onClick={() => setTab(key)}
             className={`text-xs font-medium py-2 rounded-md transition-colors ${
-              tab === key ? "bg-base-700 text-base-100" : "text-base-400"
+              tab === key
+                ? "bg-accent/15 text-accent border border-accent/30"
+                : "text-base-400 border border-transparent"
             }`}
           >
             {label}
           </button>
         ))}
       </nav>
+
+      {tab === "inicio" && (
+        <Dashboard
+          bankHistory={rm.bankHistory}
+          calendarData={rm.calendarData}
+          savedBank={rm.savedBank}
+        />
+      )}
 
       {tab === "operar" && (
         <div className="space-y-5">
@@ -90,6 +110,8 @@ export default function Home() {
           <OperationTable
             operations={rm.operations}
             onResult={rm.registerResult}
+            onPayoutChange={rm.setOperationPayout}
+            onPairChange={rm.setOperationPair}
             locked={rm.dayStatus.locked}
           />
 

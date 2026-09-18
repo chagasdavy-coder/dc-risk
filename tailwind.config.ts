@@ -10,30 +10,31 @@ const config: Config = {
     extend: {
       colors: {
         base: {
-          100: "#f2f2f3",
-          950: "#0a0a0b",
-          900: "#121214",
-          850: "#17181b",
-          800: "#1e1f23",
-          700: "#2a2b30",
-          600: "#3a3c43",
-          500: "#54565f",
-          400: "#7a7d87",
-          300: "#a4a7b0",
-          200: "#cdcfd4",
+          100: "#f3f4f6",
+          950: "#08090c",
+          900: "#0e1014",
+          850: "#141720",
+          800: "#1b1f2a",
+          700: "#272c39",
+          600: "#3a4150",
+          500: "#525a6b",
+          400: "#78808f",
+          300: "#a6adba",
+          200: "#ccd1da",
         },
         profit: {
           DEFAULT: "#22c55e",
           dim: "#16653d",
-          bg: "rgba(34,197,94,0.1)",
+          bg: "rgba(34,197,94,0.12)",
         },
         loss: {
-          DEFAULT: "#ef4444",
+          DEFAULT: "#f43f5e",
           dim: "#7f1d1d",
-          bg: "rgba(239,68,68,0.1)",
+          bg: "rgba(244,63,94,0.12)",
         },
         accent: {
-          DEFAULT: "#eab308",
+          DEFAULT: "#22d3ee",
+          2: "#8b5cf6",
         },
       },
       fontFamily: {
@@ -44,7 +45,8 @@ const config: Config = {
         xl2: "1.25rem",
       },
       boxShadow: {
-        card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 8px 24px -8px rgba(0,0,0,0.5)",
+        card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 8px 24px -8px rgba(0,0,0,0.6)",
+        glow: "0 0 0 1px rgba(34,211,238,0.2), 0 10px 40px -12px rgba(34,211,238,0.35)",
       },
       keyframes: {
         "pop": {
